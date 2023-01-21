@@ -63,7 +63,7 @@ def get_weather_data(latitude, longitude, key, sys):
     request_weather = requests.get(
         f"https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={key}&units={sys}")
     data_w = request_weather.json()
-    # print(data_w) # Also for Debugging
+    print(data_w)  # Also for Debugging
 
     # Getting data and Storing it to Variables
     global w
@@ -169,15 +169,19 @@ label.pack(pady=12, padx=10)
 
 # Input for API KEY censoring it because why not
 entry1 = customtkinter.CTkEntry(master=frame, placeholder_text="API Key", show="*")
-entry1.pack(pady=12, padx=10)
+entry1.pack(pady=5, padx=10)
 
 # Input for City Information
 entry2 = customtkinter.CTkEntry(master=frame, placeholder_text="Postal Code, City Name")
-entry2.pack(pady=12, padx=10)
+entry2.pack(pady=5, padx=10)
 
 # Choice between Metric and Imperial System
 dropdown = customtkinter.CTkComboBox(master=frame, values=["Metric", "Imperial"])
-dropdown.pack(pady=12, padx=10)
+dropdown.pack(pady=5, padx=10)
+
+checkmark = customtkinter.CTkCheckBox(master=frame, onvalue=True, offvalue=False, text="Auto Close?")
+checkmark.pack(pady=12, padx=10)
+checkmark_status = checkmark.get()
 
 
 # Gets the Weather information and saves it to the output variable used for the Output Window
@@ -225,7 +229,7 @@ open_windows = []
 
 
 # Makes the Output window as a TopLevel text is used from the variable or Text passed to the Function
-def gui_output(a):
+def gui_output(output_data):
     global open_windows
     output_window = customtkinter.CTkToplevel(root)
     output_window.title("Weatherdata")
@@ -233,16 +237,9 @@ def gui_output(a):
 
     output_label = customtkinter.CTkLabel(master=output_window, text="This is the current Weather Information!")
     output_label.pack(pady=12, padx=10)
-    output_label1 = customtkinter.CTkLabel(master=output_window, text=a)
+    output_label1 = customtkinter.CTkLabel(master=output_window, text=output_data)
     output_label1.pack(pady=12, padx=10)
     open_windows.append(output_window)
-
-
-# Function for making multiple Commands possible per Button
-def output_command():
-    get_info()
-    gui_output(output)
-    reset_variables()
 
 
 # Closes all the open windows except for the main Window
@@ -253,12 +250,32 @@ def close_all():
     open_windows = []
 
 
+def auto_close(windows):
+    print(len(windows))
+    boolean = checkmark.get()
+    if boolean:
+        if 3 >= len(windows) > 1:
+            for i in windows:
+                i.destroy()
+                windows.remove(i)
+        else:
+            close_all()
+
+
+# Function for making multiple Commands possible per Button
+def output_command():
+    get_info()
+    gui_output(output)
+    reset_variables()
+    auto_close(open_windows)
+
+
 # Button for Making the Output Window
 button = customtkinter.CTkButton(master=frame, text="Get Info", command=output_command)
-button.pack(pady=12, padx=10)
+button.pack(pady=5, padx=10)
 
 # Button for Closing all the Open Windows
 button1 = customtkinter.CTkButton(master=frame, text="Close All", command=close_all)
-button1.pack(pady=12, padx=10)
+button1.pack(pady=5, padx=10)
 
 root.mainloop()
